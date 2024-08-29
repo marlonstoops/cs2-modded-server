@@ -1,6 +1,7 @@
 services:
   cs2_modded_server:
     image: cs2-modded-server
+    build: .
     container_name: cs2-modded-server
     env_file:
       - .env
@@ -8,10 +9,10 @@ services:
       - cs2-volume:/home/steam/
       - type: bind
         source: ./custom_files
-        target: /home/custom_files/
+        target: /home/steam/custom_files/
       - type: bind
         source: ./game
-        target: /home/game/
+        target: /home/steam/game/
     ports:
       - "27015:27015/tcp"
       - "27015:27015/udp"
@@ -19,6 +20,8 @@ services:
       - "27020:27020/udp"
     cpu_count: 2
     mem_limit: 3500m
+    stdin_open: true
+    tty: true
     # command: tail -F anything
 
 volumes:

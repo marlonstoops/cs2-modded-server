@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -xe
 
 # As root (sudo su)
 # cd / && curl -s -H "Cache-Control: no-cache" -o "install.sh" "https://raw.githubusercontent.com/kus/cs2-modded-server/master/install.sh" && chmod +x install.sh && bash install.sh
@@ -6,6 +6,7 @@
 # Variables
 user="steam"
 BRANCH="master"
+HOME="/home/steam"
 
 # Check if MOD_BRANCH is set and not empty
 if [ -n "$MOD_BRANCH" ]; then
@@ -87,18 +88,13 @@ if [ ! -z "$DUCK_TOKEN" ]; then
 fi
 
 echo "Checking $user user exists..."
-getent passwd ${user} >/dev/null 2&>1
-if [ "$?" -ne "0" ]; then
+if ! id "$user" &>/dev/null; then
 	echo "Adding $user user..."
 	addgroup ${user} && \
 	adduser --system --home /home/${user} --shell /bin/false --ingroup ${user} ${user} && \
 	usermod -a -G tty ${user} && \
 	mkdir -m 777 /home/${user}/cs2 && \
 	chown -R ${user}:${user} /home/${user}/cs2
-	if [ "$?" -ne "0" ]; then
-		echo "ERROR: Cannot add user $user..."
-		exit 1
-	fi
 fi
 
 echo "Checking steamcmd exists..."
@@ -126,7 +122,6 @@ sudo -u $user /steamcmd/steamcmd.sh \
   +quit
 
 cd /home/${user}
-echo "/home/user !!!!!!!"
 
 # mkdir -p /root/.steam/sdk32/
 # ln -sf /steamcmd/linux32/steamclient.so /root/.steam/sdk32/
@@ -139,10 +134,10 @@ mkdir -p /home/${user}/.steam/sdk64/
 ln -sf /steamcmd/linux64/steamclient.so /home/${user}/.steam/sdk64/
 
 echo "Installing mods"
-cp -R /home/game/csgo/ /home/${user}/cs2/game/
+cp -R /home/steam/game/csgo/ /home/${user}/cs2/game/
 
 echo "Merging in custom files"
-cp -RT /home/custom_files/ /home/${user}/cs2/game/csgo/
+cp -RT /home/steam/custom_files/ /home/${user}/cs2/game/csgo/
 
 chown -R ${user}:${user} /home/${user}/cs2
 

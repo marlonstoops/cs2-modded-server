@@ -14,11 +14,11 @@ RUN apt-get update --fix-missing \
     locales \
     && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && dpkg-reconfigure --frontend=noninteractive locales \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
 RUN addgroup steam \
-    && useradd -g steam steam \
+    && useradd -m -g steam steam \
     && usermod -aG sudo steam
 
 ENV TICKRATE=""
@@ -29,24 +29,14 @@ ENV STEAM_ACCOUNT=""
 RUN echo "steam ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/steam \
     && chmod 0440 /etc/sudoers.d/steam
 
-RUN mkdir -p /home/cs2-modded-server
-
-RUN mkdir -p /home/steam/cs2
-
-WORKDIR /home/cs2-modded-server/
-
-RUN chown -R steam:steam /home/steam/cs2
-
-RUN git clone https://github.com/kus/cs2-modded-server
-
-RUN echo cloned repository
-
-RUN mv /home/cs2-modded-server/cs2-modded-server/* /home/cs2-modded-server
-
-RUN rm -rf /home/cs2-modded-server/cs2-modded-server
-
-WORKDIR /home/cs2-modded-server/
-
 USER steam
 
-CMD [ "sudo", "-E", "bash", "/home/cs2-modded-server/install_docker.sh" ]
+WORKDIR /home/steam
+
+RUN mkdir cs2
+
+ADD ./ cs2-modded-server/
+
+WORKDIR /home/steam/cs2-modded-server/
+
+CMD [ "sudo", "-E", "bash", "/home/steam/cs2-modded-server/install_docker.sh" ]
